@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuantu.project.mapper.PermissionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.yuantu.project.model.entity.Permission">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="permissionContent" property="permissionContent"/>
+        <result column="permissionMenu" property="permissionMenu"/>
+        <result column="permissionMenuUrl" property="permissionMenuUrl"/>
+        <result column="createTime" property="createTime"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="status" property="status"/>
+        <result column="isDeleted" property="isDeleted"/>
+    </resultMap>
+
+    <select id="isExistsByPermissionId" resultType="java.lang.Boolean">
+        SELECT IFNULL((SELECT 1
+                       FROM yzjsxy.t_permission_info
+                       WHERE is_deleted = 0
+                         AND id = #{id}
+                       LIMIT 1), 0)
+    </select>
+
+    <select id="isExistsByPermissionNameOrMenu" resultType="java.lang.Boolean">
+        SELECT IFNULL((SELECT 1
+        FROM yzjsxy.t_permission_info
+        WHERE is_deleted = 0
+        <choose>
+            <when test="permissionName != null and  permissionMenu != null">
+                AND (
+                name = #{permissionName} OR permissionMenu = #{permissionMenu}
+                )
+            </when>
+            <when test="authorityName != null">
+                AND name = #{permissionName}
+            </when>
+            <when test="permissionMenu != null">
+                AND permissionMenu = #{permissionMenu}
+            </when>
+            <otherwise>
+                AND TRUE
+            </otherwise>
+        </choose>
+        LIMIT 1
+        ), 0)
+    </select>
+
+
+</mapper>

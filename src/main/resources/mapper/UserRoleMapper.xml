@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuantu.project.mapper.UserRoleMapper">
+
+    <resultMap id="BaseResultMap" type="com.yuantu.project.model.entity.UserRole">
+        <id column="id" property="id"/>
+        <result column="userId" property="userId"/>
+        <result column="roleId" property="roleId"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="isDeleted" property="isDeleted"/>
+    </resultMap>
+
+    <select id="selectRoleByUserId" resultType="java.lang.Long">
+        SELECT id
+        FROM yzjsxy.t_user_role_info
+        WHERE isDeleted = 0
+          AND userId = #{userId}
+    </select>
+
+    <update id="deleteUserRoles" parameterType="java.util.List">
+        UPDATE yzjsxy.t_user_role_info
+        SET isDeleted = 1,
+        updateTime = NOW()
+        WHERE
+        FALSE
+        <foreach collection="userRoles" index="index" item="userRole">
+            OR(
+            roleId = #{userRole.roleId}
+            AND userId = #{userRole.userId}
+            AND isDeleted = 0
+            )
+        </foreach>
+
+    </update>
+
+</mapper>

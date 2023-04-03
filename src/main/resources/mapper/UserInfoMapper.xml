@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuantu.project.mapper.UserInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.yuantu.project.model.entity.UserInfo">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="createTime" property="createTime"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="lastLoginTime" property="lastLoginTime"/>
+        <result column="status" property="status"/>
+        <result column="isDeleted" property="isDeleted"/>
+    </resultMap>
+
+    <resultMap id="ContentStructureResultMap" type="com.yuantu.project.model.dto.ContentStructure">
+        <result column="contentName" property="permissionContent"/>
+        <result column="menuName" property="permissionMenu"/>
+        <result column="url" property="permissionMenuUrl"/>
+    </resultMap>
+
+    <select id="loadUserByUsername" resultMap="BaseResultMap">
+        SELECT
+               id,
+               username,
+               password,
+               phone,
+               email,
+               createTime,
+               updateTime,
+               lastLoginTime,
+               status,
+               isDeleted
+        FROM yzjsxy.t_user_info
+        WHERE isDeleted = 0
+          AND phone = #{phone}
+    </select>
+
+    <select id="selectPermissionsById" resultMap="com.yuantu.project.mapper.PermissionMapper.BaseResultMap">
+        SELECT t_permission.id                as id,
+               t_permission.name              as name,
+               t_permission.permissionContent as permissionContent,
+               t_permission.permissionMenuUrl as permissionMenuUrl,
+               t_permission.permissionMenu    as permissionMenu,
+               t_permission.createTime        as createTime,
+               t_permission.updateTime        as updateTime,
+               t_permission.status            as status,
+               t_permission.isDeleted         as isDeleted
+        FROM yzjsxy.t_user_info as t_user,
+             yzjsxy.t_user_role_info as t_user_role,
+             yzjsxy.t_role_info as t_role,
+             yzjsxy.t_permission_info as t_permission,
+             yzjsxy.t_role_permission_info as t_role_permission
+        WHERE t_user.isDeleted = 0
+          AND t_user_role.isDeleted = 0
+          AND t_role.isDeleted = 0
+          AND t_permission.isDeleted = 0
+          AND t_role_permission.isDeleted = 0
+          AND t_user.id = #{userId}
+          AND t_permission.id = t_role_permission.permissionId
+          AND t_role.id = t_role_permission.roleId
+          AND t_role.id = t_user_role.roleId
+          AND t_user.id = t_user_role.userId
+    </select>
+
+    <select id="selectRolesById" resultMap="com.yuantu.project.mapper.RoleMapper.BaseResultMap">
+        SELECT t_role.id           as id,
+               t_role.name         as name,
+               t_role.description  as description,
+               t_role.status       as status,
+               t_role.createUserId as createUserId,
+               t_role.createTime   as createTime,
+               t_role.updateTime   as updateTime,
+               t_role.remark       as remark,
+               t_role.isDeleted    as isDeleted
+        FROM yzjsxy.t_user_info t_usr,
+             yzjsxy.t_role_info t_role,
+             yzjsxy.t_user_role_info t_usr_role
+        WHERE t_role.id = t_usr_role.roleId
+          AND t_usr_role.userId = t_usr.id
+          AND t_usr_role.isDeleted = 0
+          AND t_role.isDeleted = 0
+          AND t_usr.isDeleted = 0
+          AND t_usr_role.roleId = t_role.id
+          AND t_usr.id = #{userId}
+    </select>
+
+    <select id="getContentStructuresByUserId" resultMap="ContentStructureResultMap">
+        SELECT t_permission.permissionContent AS permissionContent,
+               t_permission.permissionMenu    AS permissionMenu,
+               t_permission.permissionMenuUrl AS permissionMenuUrl
+        FROM yzjsxy.t_user_info t_user,
+             yzjsxy.t_user_role_info t_user_role,
+             yzjsxy.t_role_info t_role,
+             yzjsxy.t_role_permission_info t_role_permission,
+             yzjsxy.t_permission_info t_permission
+        WHERE t_user.isDeleted = 0
+          AND t_role.isDeleted = 0
+          AND t_permission.isDeleted = 0
+          AND t_user_role.isDeleted = 0
+          AND t_role_permission.isDeleted = 0
+          AND t_permission.id = t_role_permission.permissionId
+          AND t_role.id = t_role_permission.roleId
+          AND t_role.id = t_user_role.roleId
+          AND t_user.id = t_user_role.userId
+          AND t_user.id = #{userId}
+    </select>
+
+    <select id="isExistsByUserPhone" resultType="java.lang.Boolean">
+        SELECT IFNULL((SELECT 1
+                       FROM yzjsxy.t_user_info
+                       WHERE isDeleted = 0
+                         AND phone = #{phone}
+                       LIMIT 1), 0)
+
+    </select>
+
+
+</mapper>

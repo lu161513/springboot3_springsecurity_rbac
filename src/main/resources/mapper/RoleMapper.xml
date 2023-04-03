@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuantu.project.mapper.RoleMapper">
+    <resultMap id="BaseResultMap" type="com.yuantu.project.model.entity.Role">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="createUserId" property="createUserId"/>
+        <result column="createTime" property="createTime"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <result column="isDeleted" property="isDeleted"/>
+
+    </resultMap>
+
+    <select id="isExistsByRoleId" resultType="java.lang.Boolean">
+        SELECT IFNULL((SELECT 1
+                       FROM yzjsxy.t_role_info
+                       WHERE  isDeleted= 0
+                         AND id = #{roleId}
+                       LIMIT 1
+                      ), 0)
+    </select>
+    <select id="isExistsByRoleName" resultType="java.lang.Boolean">
+        SELECT IFNULL((SELECT 1
+                       FROM yzjsxy.t_role_info
+                       WHERE isDeleted = 0
+                         AND name = #{roleName}
+                       LIMIT 1
+                      ), 0)
+    </select>
+
+
+</mapper>
